@@ -8,13 +8,11 @@ import ChatInput from "../../component/ChatInput";
 import LogoutModal from "../../component/LogoutModal";
 import { FileText } from "lucide-react";
 import axiosInstance from "../../component/axiosInstance";
-import ProfileEditModal from "../../component/ProfileEditModal";
+import ProfileModal from "../../component/ProfileModal";
 import { useChat } from "../../component/ChatContext";
-import ProfileModal from "../../component/ProfileModal ";
 
 const ChatInterface = () => {
   const { t } = useTranslation();
-
   const { uuid } = useParams();
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
@@ -28,16 +26,32 @@ const ChatInterface = () => {
   const [chatRoomId, setChatRoomId] = useState(null);
   const { fetchChatRooms } = useChat();
   const chatEndRef = useRef(null);
+  const chatContainerRef = useRef(null); // Add ref for scrollable container
 
+  const { i18n } = useTranslation();
+
+  // Scroll to bottom when chatMessages or uuid change
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages, isLoading]);
+    const scrollToBottom = () => {
+      if (chatContainerRef.current && chatEndRef.current) {
+        // Scroll the container to the bottom
+        chatContainerRef.current.scrollTo({
+          top: chatContainerRef.current.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+    };
+
+    // Use setTimeout to ensure DOM updates are complete
+    const timer = setTimeout(scrollToBottom, 100); // Increased delay for reliability
+
+    return () => clearTimeout(timer); // Cleanup timeout
+  }, [chatMessages, uuid]);
 
   // Fetch chat room data if uuid is provided
   useEffect(() => {
     if (uuid) {
       const fetchChatRoom = async () => {
-        setIsLoading(true);
         setApiError(null);
         try {
           const response = await axiosInstance.get(
@@ -50,11 +64,11 @@ const ChatInterface = () => {
           setApiError(
             error.response?.data?.message || "Failed to load chat room."
           );
-        } finally {
-          setIsLoading(false);
         }
       };
       fetchChatRoom();
+    } else {
+      setCurrentView("initial");
     }
   }, [setChatMessages, uuid]);
 
@@ -64,11 +78,23 @@ const ChatInterface = () => {
     setIsLoading(true);
     setApiError(null);
 
+    // Optimistic user message
+    const newMessage = {
+      id: Date.now(),
+      text,
+      sender: "user",
+      urls: attachments.map((att) => ({
+        file_url: att.url,
+        type: att.type,
+      })),
+    };
+    setChatMessages((prev) => [...prev, newMessage]);
+    setMessage("");
+
     try {
       let roomId = chatRoomId;
       let roomUuid = uuid;
 
-      // If no chat_uuid, create a new chat room
       if (!uuid) {
         const roomResponse = await axiosInstance.post("api/chatbot/rooms/", {
           name: "New Chat",
@@ -76,20 +102,15 @@ const ChatInterface = () => {
         roomId = roomResponse.data.id;
         roomUuid = roomResponse.data.uuid;
         setChatRoomId(roomId);
-        if (fetchChatRooms) {
-          fetchChatRooms(); // Refresh Sidebar chat rooms
-        }
+        if (fetchChatRooms) fetchChatRooms();
       }
-
-      // Send the message with attachments
+      const lang = i18n.language === "he" ? "he" : "en";
       const messagePayload = {
         room: roomId,
         text: text || "",
         sender: "user",
-        urls: attachments.map((att) => ({
-          file_url: att.url,
-          type: att.type,
-        })),
+        lang: lang,
+        urls: attachments.map((att) => ({ file_url: att.url, type: att.type })),
       };
 
       const messageResponse = await axiosInstance.post(
@@ -97,15 +118,12 @@ const ChatInterface = () => {
         messagePayload
       );
 
-      // Update chat messages with both user and bot messages
-      setChatMessages([...chatMessages, ...messageResponse.data]);
-      setMessage("");
+      // Append bot messages from server
+      setChatMessages((prev) => [...prev, ...messageResponse.data.messages]);
+
       setCurrentView("conversation");
 
-      // Navigate to /chat/:uuid if new chat room was created
-      if (!uuid) {
-        navigate(`/chat/${roomUuid}`);
-      }
+      if (!uuid) navigate(`/chat/${roomUuid}`);
     } catch (error) {
       setApiError(error.response?.data?.message || "Failed to send message.");
     } finally {
@@ -127,7 +145,7 @@ const ChatInterface = () => {
     <div
       className="flex h-screen w-full overflow-hidden"
       onClick={handleCloseModal}>
-      {/* Sidebar - Hidden on mobile by default, can be toggled */}
+      {/* Sidebar */}
       <div className="hidden md:block">
         <Sidebar
           showModal={showModal}
@@ -159,13 +177,11 @@ const ChatInterface = () => {
 
         {/* Chat Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto">
-            <div className="max-w-6xl mx-auto w-full h-full px-3 sm:px-4 lg:px-6">
-              {/* {isLoading && (
-                <div className="text-center py-6">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500"></div>
-                </div>
-              )} */}
+          <div
+            className="flex-1 overflow-y-auto"
+            ref={chatContainerRef} // Attach ref to scrollable container
+          >
+            <div className="max-w-5xl mx-auto w-full h-full px-3 sm:px-4 lg:px-6">
               {apiError && (
                 <div className="text-red-500 text-sm text-center py-4">
                   {apiError}
@@ -236,15 +252,13 @@ const ChatInterface = () => {
                     <div className="flex justify-start animate-fade-in mt-2">
                       <div className="flex max-w-4xl">
                         <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 mr-4 flex items-center justify-center">
-                          <div className="shrink-0">
-                            <img
-                              src="/bot.svg"
-                              className="w-8 h-8 sm:w-10 sm:h-10"
-                              alt="Bot avatar"
-                            />
-                          </div>
+                          <img
+                            src="/bot.svg"
+                            className="w-8 h-8 sm:w-10 sm:h-10"
+                            alt="Bot avatar"
+                          />
                         </div>
-                        <div className="px-6 py-4 rounded-lg  bg-white border shadow border-gray-200">
+                        <div className="px-6 py-4 rounded-lg bg-white border shadow border-gray-200">
                           <div className="flex items-center space-x-2">
                             <div className="flex space-x-1">
                               <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
@@ -262,8 +276,8 @@ const ChatInterface = () => {
                   )}
                 </div>
               )}
+              <div ref={chatEndRef} /> {/* Empty div for scroll target */}
             </div>
-            <div ref={chatEndRef} />
           </div>
         </div>
 

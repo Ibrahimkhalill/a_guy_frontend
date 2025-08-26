@@ -15,6 +15,16 @@ export default function LoginPage() {
   const { login } = useAuth();
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      setError("Please enter both email and password.");
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
@@ -41,6 +51,7 @@ export default function LoginPage() {
 
       navigate("/chat");
     } catch (err) {
+      console.log(err);
       setError(
         err.response?.data?.message || "Login failed. Please try again."
       );

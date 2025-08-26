@@ -2,7 +2,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const axiosInstance = axios.create({
-  baseURL: "http://127.0.0.1:8000/",
+  baseURL: "http://127.0.0.1:8003/",
 });
 
 // Attach access token to headers
@@ -22,11 +22,11 @@ const refreshAccessToken = async () => {
   try {
     const refreshToken = Cookies.get("refreshToken"); // ✅ Get from cookies
     if (!refreshToken) {
-      throw new Error("No refresh token found");
+      return null;
     }
 
     const response = await axios.post(
-      "http://127.0.0.1:8000/api/auth/refresh/",
+      "http://127.0.0.1:8003/api/auth/refresh/",
       {
         refresh_token: refreshToken,
       }
