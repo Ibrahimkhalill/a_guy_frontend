@@ -3,7 +3,13 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import axiosInstance from "./axiosInstance";
 
-const ChatInput = ({ message, setMessage, handleSendMessage, disabled }) => {
+const ChatInput = ({
+  message,
+  setMessage,
+  handleSendMessage,
+  disabled,
+  placeholder,
+}) => {
   const { t, i18n } = useTranslation();
   const [showPlusModal, setShowPlusModal] = useState(false);
   const [attachments, setAttachments] = useState([]);
@@ -12,6 +18,8 @@ const ChatInput = ({ message, setMessage, handleSendMessage, disabled }) => {
   const photoInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
+  const active = i18n.language === "he" ? "Heb" : "Eng";
+  const isHebrew = i18n.language === "he";
 
   // Auto-resize textarea based on content, up to 10 rows
   useEffect(() => {
@@ -29,11 +37,6 @@ const ChatInput = ({ message, setMessage, handleSendMessage, disabled }) => {
       textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
     }
   }, [message]);
-
-  const handlePlusClick = (e) => {
-    e.stopPropagation();
-    setShowPlusModal(!showPlusModal);
-  };
 
   const handleOptionClick = (action) => {
     if (action === "upload_photo") {
@@ -118,8 +121,6 @@ const ChatInput = ({ message, setMessage, handleSendMessage, disabled }) => {
     };
   }, []);
 
-  const isRTL = i18n.language === "he";
-
   const sendMessageWithAttachments = () => {
     if (!message.trim() && attachments.length === 0) return;
     if (attachments.some((att) => att.uploading)) return;
@@ -135,10 +136,16 @@ const ChatInput = ({ message, setMessage, handleSendMessage, disabled }) => {
           {uploadError}
         </div>
       )}
-      <div className="max-w-5xl mx-auto flex items-end gap-2 sm:gap-3 relative">
+      <div
+        className={`max-w-5xl mx-auto flex items-end gap-2 sm:gap-3 relative ${
+          isHebrew ? "flex-row-reverse" : "flex-row"
+        }`}>
         <div className="flex-1 flex flex-col gap-2 bg-white border border-gray-200 rounded-xl sm:rounded-2xl py-1 shadow-sm">
           {attachments.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-2">
+            <div
+              className={`flex flex-wrap gap-2 mb-2 ${
+                isHebrew ? "justify-end" : "justify-start"
+              }`}>
               {attachments.map((file) => (
                 <div key={file.id} className="relative">
                   {file.type === "image" ? (
@@ -177,22 +184,37 @@ const ChatInput = ({ message, setMessage, handleSendMessage, disabled }) => {
             </div>
           )}
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div
+            className={`flex items-center gap-2 sm:gap-3 ${
+              isHebrew ? "flex-row-reverse" : "flex-row"
+            }`}>
             <div ref={plusRef} className="relative">
+              {/* <button
+                onClick={() => setShowPlusModal(!showPlusModal)}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-full transition-colors">
+                <Plus className="w-5 h-5" />
+              </button> */}
+
               {/* Plus Modal */}
               {showPlusModal && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute bottom-full right-0 mb-2 w-40 sm:w-44 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  className={`absolute bottom-full mb-2 w-40 sm:w-44 bg-white rounded-lg shadow-lg border border-gray-200 z-50 ${
+                    isHebrew ? "left-0" : "right-0"
+                  }`}>
                   <button
                     onClick={() => handleOptionClick("upload_photo")}
-                    className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 text-gray-700 hover:bg-gray-50 transition-colors text-sm sm:text-base text-left">
+                    className={`w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 text-gray-700 hover:bg-gray-50 transition-colors text-sm sm:text-base ${
+                      isHebrew ? "text-right flex-row-reverse" : "text-left"
+                    }`}>
                     <Image className="w-4 h-4 sm:w-5 text-gray-500" />
                     {t("upload_photo")}
                   </button>
                   <button
                     onClick={() => handleOptionClick("add_file")}
-                    className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 text-gray-700 hover:bg-gray-50 transition-colors text-sm sm:text-base text-left">
+                    className={`w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 text-gray-700 hover:bg-gray-50 transition-colors text-sm sm:text-base ${
+                      isHebrew ? "text-right flex-row-reverse" : "text-left"
+                    }`}>
                     <FileText className="w-4 h-4 sm:w-5 text-gray-500" />
                     {t("add_file")}
                   </button>
@@ -205,7 +227,14 @@ const ChatInput = ({ message, setMessage, handleSendMessage, disabled }) => {
                 ref={textareaRef}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className={`w-full min-h-[30px] max-h-[240px] h-auto border-none outline-none resize-none text-gray-800 text-sm sm:text-base font-normal leading-relaxed overflow-y-auto pt-2 pb-2 text-left`}
+                className={`w-full min-h-[30px] max-h-[240px] h-auto border-none outline-none resize-none text-gray-800 text-sm sm:text-base font-normal leading-relaxed overflow-y-auto pt-2 pb-2 ${
+                  isHebrew ? "text-right pr-2 pl-8" : "text-left pl-2 pr-8"
+                }`}
+                style={{
+                  direction: isHebrew ? "rtl" : "ltr",
+                  textAlign: isHebrew ? "right" : "left",
+                }}
+                dir={isHebrew ? "rtl" : "ltr"}
                 rows={1}
                 disabled={disabled}
                 onKeyDown={(e) => {
@@ -215,10 +244,13 @@ const ChatInput = ({ message, setMessage, handleSendMessage, disabled }) => {
                   }
                 }}
               />
-              {/* Centered placeholder overlay */}
+              {/* Placeholder overlay */}
               {!message && (
-                <div className="absolute inset-0 sm:-left-93 sm:-top-1 w-full -left-20 -top-1 flex items-center justify-center pointer-events-none text-gray-400 text-sm sm:text-base">
-                  {t("input_placeholder")}
+                <div
+                  className={`absolute inset-y-0 flex items-center pointer-events-none text-gray-400 text-sm sm:text-base ${
+                    isHebrew ? "right-2" : "left-2"
+                  }`}>
+                  {placeholder}
                 </div>
               )}
             </div>
@@ -243,8 +275,9 @@ const ChatInput = ({ message, setMessage, handleSendMessage, disabled }) => {
 
         {/* Send Button */}
         <button
+          title="Send"
           onClick={sendMessageWithAttachments}
-          className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-gray-200 bg-blue-50 hover:bg-blue-100 text-blue-500 hover:text-blue-600 transition-colors shadow-sm ${
+          className={`flex items-center cursor-pointer justify-center w-14 h-14 rounded-full border border-gray-200 bg-[#EFF1EE] hover:bg-[#EFF1EE] text-[#41503F] hover:text-[-blue-600] transition-colors shadow-sm ${
             disabled ? "opacity-50 cursor-not-allowed" : ""
           }`}
           disabled={disabled}>

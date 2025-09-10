@@ -9,6 +9,7 @@ export const ChatProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
+  const [selectedChatId, setSelectedChatId] = useState(null);
   const fetchChatRooms = useCallback(async () => {
     setIsLoading(true);
     setApiError(null);
@@ -37,6 +38,8 @@ export const ChatProvider = ({ children }) => {
         apiError,
         setChatMessages,
         chatMessages,
+        setSelectedChatId,
+        selectedChatId,
       }}>
       {children}
     </ChatContext.Provider>

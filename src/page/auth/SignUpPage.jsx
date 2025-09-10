@@ -38,9 +38,12 @@ export default function SignUpPage() {
 
       // Handle successful signup by navigating to OTP page with user_id
       console.log("Sign up successful:", response.data);
-      navigation("/email-verification", {
-        state: { user_id: response.data.user_id },
-      });
+
+      if (response.status === 201) {
+        navigation("/email-verification", {
+          state: { user_id: response.data.user_id },
+        });
+      }
     } catch (err) {
       setError(
         err.response?.data?.message || "Sign up failed. Please try again."
@@ -82,7 +85,7 @@ export default function SignUpPage() {
                 <div className="text-red-500 text-sm text-center">{error}</div>
               )}
               {isLoading && (
-                <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-black/30 flex h-screen items-center justify-center z-50">
                   <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-primary-500"></div>
                 </div>
               )}

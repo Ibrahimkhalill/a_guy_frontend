@@ -204,8 +204,9 @@ export default function EmailVerification() {
               </h1>
               <p className="text-gray-600 leading-relaxed">
                 Please enter the six-digit verification code sent to
-                <br />
-                <span className="font-medium">{email || "your email"}</span>
+                <span className="font-medium ml-1">
+                  {email || "your email"}
+                </span>
               </p>
             </div>
 
@@ -224,7 +225,7 @@ export default function EmailVerification() {
             )}
 
             {/* Verification Code Inputs */}
-            <div className="flex justify-center gap-3 mb-8">
+            <div className="flex justify-center sm:gap-3 gap-1 mb-8">
               {verificationCode.map((digit, index) => (
                 <input
                   key={index}
@@ -252,7 +253,7 @@ export default function EmailVerification() {
             </button>
 
             {/* Resend Section */}
-            <div className="text-center mt-6">
+            <div className="text-center mt-6 w-full">
               <span className="text-gray-500 text-sm">
                 Didn't get the email?{" "}
               </span>
@@ -261,7 +262,7 @@ export default function EmailVerification() {
                   type="button"
                   onClick={handleResendOtp}
                   disabled={isLoading}
-                  className={`text-primary-500 cursor-pointer text-sm font-medium hover:text-green-800 ${
+                  className={`text-primary-500 w-full cursor-pointer text-sm font-medium hover:text-green-800 ${
                     isLoading ? "opacity-50 cursor-not-allowed" : ""
                   }`}>
                   Resend OTP

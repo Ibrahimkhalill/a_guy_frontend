@@ -16,7 +16,7 @@ export default function SearchModal({ isOpen, onClose }) {
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState(null);
 
-  const isRTL = i18n.language === "he";
+  const isHebrew = i18n.language === "he";
 
   // Fetch chat rooms when modal opens
   useEffect(() => {
@@ -102,12 +102,13 @@ export default function SearchModal({ isOpen, onClose }) {
       onClick={onClose}>
       <div
         className="bg-white rounded-lg shadow-lg w-full max-w-lg p-4"
-        onClick={(e) => e.stopPropagation()}>
+        onClick={(e) => e.stopPropagation()}
+        dir={isHebrew ? "rtl" : "ltr"}>
         {/* Search Bar */}
         <div className="relative mb-4 border border-[#DDDBDB] rounded-md">
           <Search
             className={`absolute ${
-              isRTL ? "right-3" : "left-3"
+              isHebrew ? "right-3" : "left-3"
             } top-1/2 transform -translate-y-1/2 text-gray-400`}
             size={18}
           />
@@ -117,8 +118,10 @@ export default function SearchModal({ isOpen, onClose }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className={`w-full ${
-              isRTL ? "pr-10 pl-3" : "pl-10 pr-3"
+              isHebrew ? "pr-10 pl-3 text-right" : "pl-10 pr-3 text-left"
             } py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500`}
+            style={{ direction: isHebrew ? "rtl" : "ltr" }}
+            dir={isHebrew ? "rtl" : "ltr"}
             aria-label={t("search_placeholder")}
           />
         </div>
@@ -133,14 +136,19 @@ export default function SearchModal({ isOpen, onClose }) {
         <div className="space-y-3">
           {todayChats.length > 0 && (
             <div>
-              <p className="text-sm font-semibold text-gray-700 mb-1">
+              <p
+                className={`text-sm font-semibold text-gray-700 mb-1 ${
+                  isHebrew ? "text-right" : "text-left"
+                }`}>
                 {t("today")}
               </p>
               {todayChats.map((chat, idx) => (
                 <p
                   key={chat.id || idx}
                   onClick={() => handleChatClick(chat.uuid)}
-                  className="cursor-pointer hover:bg-gray-100 p-2 rounded text-sm"
+                  className={`cursor-pointer hover:bg-gray-100 p-2 rounded text-sm ${
+                    isHebrew ? "text-right" : "text-left"
+                  }`}
                   aria-label={`Open chat ${chat.name}`}>
                   {chat.name}
                 </p>
@@ -150,14 +158,19 @@ export default function SearchModal({ isOpen, onClose }) {
 
           {yesterdayChats.length > 0 && (
             <div>
-              <p className="text-sm font-semibold text-gray-700 mb-1">
+              <p
+                className={`text-sm font-semibold text-gray-700 mb-1 ${
+                  isHebrew ? "text-right" : "text-left"
+                }`}>
                 {t("yesterday")}
               </p>
               {yesterdayChats.map((chat, idx) => (
                 <p
                   key={chat.id || idx}
                   onClick={() => handleChatClick(chat.uuid)}
-                  className="cursor-pointer hover:bg-gray-100 p-2 rounded text-sm"
+                  className={`cursor-pointer hover:bg-gray-100 p-2 rounded text-sm ${
+                    isHebrew ? "text-right" : "text-left"
+                  }`}
                   aria-label={`Open chat ${chat.name}`}>
                   {chat.name}
                 </p>

@@ -49,7 +49,15 @@ export default function LoginPage() {
         localStorage.removeItem("remembered_email");
       }
 
-      navigate("/chat");
+      if (response.status === 200) {
+        // Optionally, show a success message or toast here
+        if (response.data.is_verified === false) {
+          setError("Please verify your email before logging in.");
+          return;
+        }
+
+        navigate("/chat");
+      }
     } catch (err) {
       console.log(err);
       setError(
@@ -79,129 +87,141 @@ export default function LoginPage() {
       <main className="flex-1 flex items-center justify-center px-6">
         <div className="w-full max-w-md">
           {/* Login Card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Log in</h1>
-              <p className="text-gray-600">Welcome Back!</p>
-            </div>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault(); // stop page reload
+              handleLogin();
+            }}>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+              {/* Header */}
 
-            {/* Form */}
-            <div className="space-y-6">
-              {/* Error Message */}
-              {error && (
-                <div className="text-red-500 text-sm text-center">{error}</div>
-              )}
-
-              {/* Loading Indicator */}
-              {isLoading && (
-                <div className="fixed  min-h-screen inset-0 bg-black/30 flex items-center justify-center z-50">
-                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-primary-500"></div>
-                </div>
-              )}
-
-              {/* Email Field */}
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setError("");
-                  }}
-                  className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="Enter your email"
-                  disabled={isLoading}
-                />
+              <div className="text-center mb-8">
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                  Log in
+                </h1>
+                <p className="text-gray-600">Welcome Back!</p>
               </div>
 
-              {/* Password Field */}
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-                <div className="relative">
+              {/* Form */}
+              <div className="space-y-6">
+                {/* Error Message */}
+                {error && (
+                  <div className="text-red-500 text-sm text-center">
+                    {error}
+                  </div>
+                )}
+
+                {/* Loading Indicator */}
+                {isLoading && (
+                  <div className="fixed  min-h-screen inset-0 bg-black/30 flex items-center justify-center z-50">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-primary-500"></div>
+                  </div>
+                )}
+
+                {/* Email Field */}
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
                   <input
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    value={password}
+                    type="email"
+                    id="email"
+                    value={email}
                     onChange={(e) => {
-                      setPassword(e.target.value);
+                      setEmail(e.target.value);
                       setError("");
                     }}
-                    className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent pr-10"
-                    placeholder="Enter your password"
+                    className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="Enter your email"
                     disabled={isLoading}
                   />
+                </div>
+
+                {/* Password Field */}
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setError("");
+                      }}
+                      className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent pr-10"
+                      placeholder="Enter your password"
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      disabled={isLoading}>
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Remember Me & Forgot Password */}
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-primary-500"
+                      disabled={isLoading}
+                    />
+                    <span className="ml-2 text-sm text-gray-600">
+                      Remember Me
+                    </span>
+                  </label>
+                  <Link to="/forget-password">
+                    <button
+                      type="button"
+                      className="text-sm text-primary-500 hover:text-green-800 cursor-pointer"
+                      disabled={isLoading}>
+                      Forget Password?
+                    </button>
+                  </Link>
+                </div>
+
+                {/* Login Button */}
+                <button
+                  type="submit"
+                  className={`w-full cursor-pointer bg-primary-500 hover:bg-primary-300 text-white font-medium py-3 rounded-lg transition-colors duration-200 ${
+                    isLoading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={isLoading}>
+                  {isLoading ? "Logging In..." : "Log In"}
+                </button>
+
+                {/* Sign Up Link */}
+                <div className="text-center">
+                  <span className="text-gray-500 text-sm">
+                    Don't have an account?{" "}
+                  </span>
                   <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    onClick={() => navigate("/signup")}
+                    className="text-primary-500 cursor-pointer text-sm font-medium hover:text-green-800"
                     disabled={isLoading}>
-                    {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
+                    Sign Up
                   </button>
                 </div>
               </div>
-
-              {/* Remember Me & Forgot Password */}
-              <div className="flex items-center justify-between">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-primary-500"
-                    disabled={isLoading}
-                  />
-                  <span className="ml-2 text-sm text-gray-600">
-                    Remember Me
-                  </span>
-                </label>
-                <Link to="/forget-password">
-                  <button
-                    className="text-sm text-primary-500 hover:text-green-800 cursor-pointer"
-                    disabled={isLoading}>
-                    Forget Password?
-                  </button>
-                </Link>
-              </div>
-
-              {/* Login Button */}
-              <button
-                onClick={handleLogin}
-                className={`w-full cursor-pointer bg-primary-500 hover:bg-primary-300 text-white font-medium py-3 rounded-lg transition-colors duration-200 ${
-                  isLoading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={isLoading}>
-                {isLoading ? "Logging In..." : "Log In"}
-              </button>
-
-              {/* Sign Up Link */}
-              <div className="text-center">
-                <span className="text-gray-500 text-sm">
-                  Don't have an account?{" "}
-                </span>
-                <button
-                  onClick={() => navigate("/signup")}
-                  className="text-primary-500 cursor-pointer text-sm font-medium hover:text-green-800"
-                  disabled={isLoading}>
-                  Sign Up
-                </button>
-              </div>
             </div>
-          </div>
+          </form>
         </div>
       </main>
     </div>

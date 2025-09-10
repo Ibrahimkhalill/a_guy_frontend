@@ -7,7 +7,8 @@ import { useTranslation } from "react-i18next";
 import axiosInstance from "./axiosInstance";
 
 const ProfileModal = ({ setLogoutModalOpen }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isHebrew = i18n.language === "he";
 
   const [isOpen, setIsOpen] = useState(false);
   const [nameEdit, setNameEdit] = useState(false);
@@ -91,7 +92,8 @@ const ProfileModal = ({ setLogoutModalOpen }) => {
           onClick={() => setIsOpen(false)}>
           <div
             className="bg-white rounded-xl p-6 w-96 relative"
-            onClick={(e) => e.stopPropagation()}>
+            onClick={(e) => e.stopPropagation()}
+            dir={isHebrew ? "rtl" : "ltr"}>
             {/* Loading Indicator */}
             {isLoading && (
               <div className="fixed  min-h-screen inset-0 bg-black/30 flex items-center justify-center z-50">
@@ -118,7 +120,10 @@ const ProfileModal = ({ setLogoutModalOpen }) => {
                 alt="Profile"
                 className="w-24 h-24 rounded-full border-4 border-white shadow"
               />
-              <div className="absolute bottom-0 right-30 bg-white rounded-full p-1 shadow cursor-pointer">
+              <div
+                className={`absolute bottom-0 bg-white rounded-full p-1 shadow cursor-pointer ${
+                  isHebrew ? "left-30" : "right-30"
+                }`}>
                 <label
                   htmlFor="profile-picture-upload"
                   className="cursor-pointer">
@@ -136,7 +141,10 @@ const ProfileModal = ({ setLogoutModalOpen }) => {
             </div>
 
             {/* Name and Email */}
-            <div className="text-center mb-4">
+            <div
+              className={`text-center mb-4 ${
+                isHebrew ? "text-right" : "text-left"
+              }`}>
               <h2 className="text-xl font-semibold text-[#5B7159]">
                 {t("greeting_name", {
                   name: profileData?.user_profile?.name || "User",
@@ -148,9 +156,14 @@ const ProfileModal = ({ setLogoutModalOpen }) => {
             </div>
 
             {/* Buttons */}
-            <div className="flex justify-between gap-2 mb-4">
+            <div
+              className={`flex justify-between gap-2 mb-4 ${
+                isHebrew ? "flex-row-reverse" : "flex-row"
+              }`}>
               <button
-                className="flex-1 border border-gray-300 text-[#5B7159] rounded-lg py-2 hover:bg-gray-50 flex items-center justify-center gap-2"
+                className={`flex-1 border border-gray-300 text-[#5B7159] rounded-lg py-2 hover:bg-gray-50 flex items-center justify-center gap-2 ${
+                  isHebrew ? "flex-row-reverse" : "flex-row"
+                }`}
                 onClick={() => {
                   setNameEdit(true);
                   setIsOpen(false);
@@ -160,7 +173,9 @@ const ProfileModal = ({ setLogoutModalOpen }) => {
                 <span>{t("edit")}</span>
               </button>
               <button
-                className="flex-1 border border-gray-300 text-[#5B7159] rounded-lg py-2 hover:bg-gray-50 flex items-center justify-center gap-2"
+                className={`flex-1 border border-gray-300 text-[#5B7159] rounded-lg py-2 hover:bg-gray-50 flex items-center justify-center gap-2 ${
+                  isHebrew ? "flex-row-reverse" : "flex-row"
+                }`}
                 onClick={() => setIsSettingsModalOpen(true)}
                 disabled={isLoading}>
                 <Settings className="w-5 h-5" />

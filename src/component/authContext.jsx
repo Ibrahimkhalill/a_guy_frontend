@@ -22,6 +22,8 @@ export const AuthProvider = ({ children }) => {
   const login = (token, email, name, refreshToken = null) => {
     setAuth({ token, email, username: name });
 
+    console.log("Login successful:", { token, email, name, refreshToken });
+
     Cookies.set("authToken", token, { secure: true, sameSite: "Strict" });
     Cookies.set("authemail", email, { secure: true, sameSite: "Strict" });
     Cookies.set("username", name, { secure: true, sameSite: "Strict" });
